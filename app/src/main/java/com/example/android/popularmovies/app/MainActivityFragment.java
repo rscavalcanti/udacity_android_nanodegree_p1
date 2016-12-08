@@ -38,13 +38,11 @@ import static com.example.android.popularmovies.app.BuildConfig.THE_MOVIE_API_KE
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements OnTaskCompleted {
 
     private ArrayList<PopularMovies> moviesArrayList;
     private PopularMoviesAdapter mPopularMoviesAdapter;
-    private final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/movie/";
-    private final String KEY_PARAM = "api_key";
-    private final String REQUEST_METHOD = "GET";
+    private MoviesAsyncTask moviesAsyncTask;
 
     public MainActivityFragment() {
     }
@@ -68,8 +66,6 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        updateMovies();
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mPopularMoviesAdapter = new PopularMoviesAdapter(getContext(), new ArrayList<PopularMovies>());
         GridView gridView = (GridView) rootView.findViewById(R.id.movies_grid);
@@ -90,115 +86,24 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
-    /**
-     * Async class responsible to fetch the data
-     */
-    public class FetchMoviesData extends AsyncTask<String, Void, List<PopularMovies>> {
-        private final String LOG_TAG = FetchMoviesData.class.getSimpleName();
-
-        @Override
-        protected List<PopularMovies> doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String popularMoviesJsonStr = null;
-            StringBuffer buffer = new StringBuffer();
-
-
-            try {
-                urlConnection = getHttpURLConnection(urlConnection, params[0]);
-
-                InputStream inputStream = urlConnection.getInputStream();
-                if (inputStream == null) {
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                popularMoviesJsonStr = getPopularMoviesJsonStr(reader, buffer);
-                if (popularMoviesJsonStr == null) {
-                    return null;
-                }
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            return getPopularMovies(popularMoviesJsonStr);
-        }
-
-        /**
-         * Resposible to get the movies
-         *
-         * @param popularMoviesJsonStr
-         * @return
-         */
-        private ArrayList<PopularMovies> getPopularMovies(String popularMoviesJsonStr) {
-
-            try {
-                moviesArrayList = getMoviesDataFromJson(popularMoviesJsonStr);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return moviesArrayList;
-        }
-
-        @Nullable
-        private String getPopularMoviesJsonStr(BufferedReader reader, StringBuffer buffer) throws IOException {
-            String popularMoviesJsonStr;
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line + "\n");
-            }
-
-            if (buffer.length() == 0) {
-                return null;
-            }
-
-            popularMoviesJsonStr = buffer.toString();
-            return popularMoviesJsonStr;
-        }
-
-        @NonNull
-        private HttpURLConnection getHttpURLConnection(HttpURLConnection urlConnection, String param) throws IOException {
-            Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
-                    .appendPath(param)
-                    .appendQueryParameter(KEY_PARAM, THE_MOVIE_API_KEY).build();
-
-            URL url = new URL(builtUri.toString());
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod(REQUEST_METHOD);
-            urlConnection.connect();
-            return urlConnection;
-        }
-
-        @Override
-        protected void onPostExecute(List<PopularMovies> result) {
-            if (result != null) {
-                mPopularMoviesAdapter.clear();
-                for (PopularMovies popularMovie : result) {
-                    mPopularMoviesAdapter.add(popularMovie);
-                }
-            }
-        }
-    }
-
     @Override
     public void onStart() {
         super.onStart();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String prefMovies = prefs.getString(getString(R.string.pref_movies_key), getString(R.string.pref_movies_default));
+        moviesAsyncTask = new MoviesAsyncTask(new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(List<PopularMovies> result) {
+                if (result != null) {
+                    mPopularMoviesAdapter.clear();
+                    for (PopularMovies popularMovie : result) {
+                        mPopularMoviesAdapter.add(popularMovie);
+                    }
+                }
+            }
+        });
         if (isOnline()) {
-            updateMovies();
+            moviesAsyncTask.execute(prefMovies);
         } else {
             createToastMessage(R.string.msg_internet_connection);
         }
@@ -206,52 +111,6 @@ public class MainActivityFragment extends Fragment {
 
     private void createToastMessage(int message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * Method responsible to convert the JSON movies String into an array of PopularMovies
-     */
-    private ArrayList<PopularMovies> getMoviesDataFromJson(String moviesJsonStr)
-            throws JSONException {
-
-        final String RESULTS = "results";
-        final String URL = "http://image.tmdb.org/t/p/w185/";
-        final String POSTER_PATH = "poster_path";
-        final String TITLE = "original_title";
-        final String OVERVIEW = "overview";
-        final String RELEASE_DATE = "release_date";
-        final String USER_RATING = "vote_average";
-
-        ArrayList<PopularMovies> popularMoviesList = new ArrayList<>();
-
-        JSONObject moviesJson = new JSONObject(moviesJsonStr);
-        JSONArray moviesArray = moviesJson.getJSONArray(RESULTS);
-
-        for (int i = 0; i < moviesArray.length(); i++) {
-
-            String posterPath = moviesArray.getJSONObject(i).getString(POSTER_PATH);
-            String title = moviesArray.getJSONObject(i).getString(TITLE);
-            String overview = moviesArray.getJSONObject(i).getString(OVERVIEW);
-            String releaseDate = moviesArray.getJSONObject(i).getString(RELEASE_DATE);
-            String userRating = moviesArray.getJSONObject(i).getString(USER_RATING);
-
-            PopularMovies popularMovies = new PopularMovies(URL + posterPath, title, overview, releaseDate, userRating);
-            popularMoviesList.add(popularMovies);
-        }
-
-        return popularMoviesList;
-    }
-
-    /**
-     * Method responsible to update the movies in adapter accordingly
-     * to the default shared preferences
-     */
-    private void updateMovies() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String prefMovies = prefs.getString(getString(R.string.pref_movies_key), getString(R.string.pref_movies_default));
-
-        FetchMoviesData fetchMoviesData = new FetchMoviesData();
-        fetchMoviesData.execute(prefMovies);
     }
 
     /**
@@ -266,4 +125,7 @@ public class MainActivityFragment extends Fragment {
 
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
+
+    @Override
+    public void onTaskCompleted(List<PopularMovies> result) {}
 }
