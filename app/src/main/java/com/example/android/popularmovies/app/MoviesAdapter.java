@@ -15,14 +15,14 @@ import java.util.List;
  * Created by EXToliveir on 23/11/2016.
  */
 
-public class PopularMoviesAdapter extends ArrayAdapter<PopularMovies> {
-    public PopularMoviesAdapter(Context context,  List<PopularMovies> popularMovies) {
-        super(context, 0, popularMovies);
+public class MoviesAdapter extends ArrayAdapter<Movies> {
+    public MoviesAdapter(Context context, List<Movies> movies) {
+        super(context, 0, movies);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        PopularMovies popularMovie = getItem(position);
+        Movies popularMovie = getItem(position);
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(

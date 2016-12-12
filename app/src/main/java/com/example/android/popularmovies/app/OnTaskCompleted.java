@@ -7,5 +7,5 @@ import java.util.List;
  */
 
 public interface OnTaskCompleted {
-    void onTaskCompleted(List<PopularMovies> result);
+    void onTaskCompleted(List<Movies> result);
 }

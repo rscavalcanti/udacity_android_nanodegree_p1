@@ -13,8 +13,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class MovieDetailsActivityFragment extends Fragment {
-    private PopularMovies mPopularMovies;
-    private ArrayAdapter<PopularMovies> mPopularMoviesAdapter;
+    private Movies mMovies;
+    private ArrayAdapter<Movies> mPopularMoviesAdapter;
 
     public MovieDetailsActivityFragment() {
     }
@@ -28,11 +28,11 @@ public class MovieDetailsActivityFragment extends Fragment {
 
         if (intent != null){ //TODO Enhance this check
 
-            mPopularMovies = (PopularMovies) intent.getParcelableArrayListExtra(MOVIE).get(0);
-            ArrayList<PopularMovies> popularMovies = new ArrayList<>();
-            popularMovies.add(mPopularMovies);
+            mMovies = (Movies) intent.getParcelableArrayListExtra(MOVIE).get(0);
+            ArrayList<Movies> movies = new ArrayList<>();
+            movies.add(mMovies);
 
-            mPopularMoviesAdapter = new PopularMoviesAdapter(getActivity(),popularMovies);
+            mPopularMoviesAdapter = new MoviesAdapter(getActivity(), movies);
             ListView listView = (ListView) rootView.findViewById(R.id.movie_list);
             listView.setAdapter(mPopularMoviesAdapter);
 
@@ -41,10 +41,10 @@ public class MovieDetailsActivityFragment extends Fragment {
             TextView userRating = (TextView) rootView.findViewById(R.id.textView_user_rating);
             TextView overview = (TextView) rootView.findViewById(R.id.textView_overview);
 
-            title.setText(mPopularMovies.title);
-            year.setText(mPopularMovies.releaseDate.substring(0,4));
-            overview.setText(mPopularMovies.overview);
-            userRating.setText(mPopularMovies.userRating);
+            title.setText(mMovies.title);
+            year.setText(mMovies.releaseDate.substring(0,4));
+            overview.setText(mMovies.overview);
+            userRating.setText(mMovies.userRating);
         }
         return rootView;
     }

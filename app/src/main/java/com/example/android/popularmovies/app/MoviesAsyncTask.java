@@ -28,14 +28,14 @@ import static com.example.android.popularmovies.app.BuildConfig.THE_MOVIE_API_KE
 /**
  * Async class responsible to fetch the data
  */
-public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>> {
+public class MoviesAsyncTask extends AsyncTask<String, Void, List<Movies>> {
 
     private final String LOG_TAG = MoviesAsyncTask.class.getSimpleName();
     private final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/movie/";
     private final String KEY_PARAM = "api_key";
     private final String REQUEST_METHOD = "GET";
 
-    private ArrayList<PopularMovies> moviesArrayList;
+    private ArrayList<Movies> moviesArrayList;
     public OnTaskCompleted listener;
 
     public MoviesAsyncTask(OnTaskCompleted listener){
@@ -43,7 +43,7 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>
     }
 
     @Override
-    protected List<PopularMovies> doInBackground(String... params) {
+    protected List<Movies> doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String popularMoviesJsonStr = null;
@@ -89,7 +89,7 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>
      * @param popularMoviesJsonStr
      * @return
      */
-    private ArrayList<PopularMovies> getPopularMovies(String popularMoviesJsonStr) {
+    private ArrayList<Movies> getPopularMovies(String popularMoviesJsonStr) {
 
         try {
             moviesArrayList = getMoviesDataFromJson(popularMoviesJsonStr);
@@ -130,14 +130,14 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>
     }
 
     @Override
-    protected void onPostExecute(List<PopularMovies> result) {
+    protected void onPostExecute(List<Movies> result) {
         listener.onTaskCompleted(result);
     }
 
     /**
-     * Method responsible to convert the JSON movies String into an array of PopularMovies
+     * Method responsible to convert the JSON movies String into an array of Movies
      */
-    private ArrayList<PopularMovies> getMoviesDataFromJson(String moviesJsonStr)
+    private ArrayList<Movies> getMoviesDataFromJson(String moviesJsonStr)
             throws JSONException {
 
         final String RESULTS = "results";
@@ -148,7 +148,7 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>
         final String RELEASE_DATE = "release_date";
         final String USER_RATING = "vote_average";
 
-        ArrayList<PopularMovies> popularMoviesList = new ArrayList<>();
+        ArrayList<Movies> moviesList = new ArrayList<>();
 
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
         JSONArray moviesArray = moviesJson.getJSONArray(RESULTS);
@@ -161,10 +161,10 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<PopularMovies>
             String releaseDate = moviesArray.getJSONObject(i).getString(RELEASE_DATE);
             String userRating = moviesArray.getJSONObject(i).getString(USER_RATING);
 
-            PopularMovies popularMovies = new PopularMovies(URL + posterPath, title, overview, releaseDate, userRating);
-            popularMoviesList.add(popularMovies);
+            Movies movies = new Movies(URL + posterPath, title, overview, releaseDate, userRating);
+            moviesList.add(movies);
         }
 
-        return popularMoviesList;
+        return moviesList;
     }
 }

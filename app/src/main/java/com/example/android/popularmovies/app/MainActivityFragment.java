@@ -5,14 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,28 +16,16 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.android.popularmovies.app.BuildConfig.THE_MOVIE_API_KEY;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment implements OnTaskCompleted {
 
-    private ArrayList<PopularMovies> moviesArrayList;
-    private PopularMoviesAdapter mPopularMoviesAdapter;
+    private ArrayList<Movies> moviesArrayList;
+    private MoviesAdapter mMoviesAdapter;
     private MoviesAsyncTask moviesAsyncTask;
 
     public MainActivityFragment() {
@@ -67,16 +51,16 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mPopularMoviesAdapter = new PopularMoviesAdapter(getContext(), new ArrayList<PopularMovies>());
+        mMoviesAdapter = new MoviesAdapter(getContext(), new ArrayList<Movies>());
         GridView gridView = (GridView) rootView.findViewById(R.id.movies_grid);
-        gridView.setAdapter(mPopularMoviesAdapter);
+        gridView.setAdapter(mMoviesAdapter);
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                PopularMovies popularMovies = mPopularMoviesAdapter.getItem(position);
+                Movies movies = mMoviesAdapter.getItem(position);
                 ArrayList popularMoviesArray = new ArrayList<>();
-                popularMoviesArray.add(popularMovies);
+                popularMoviesArray.add(movies);
                 Intent intent = new Intent(getActivity(), MovieDetailsActivity.class)
                         .putParcelableArrayListExtra("movie", popularMoviesArray);
 
@@ -93,11 +77,11 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
         String prefMovies = prefs.getString(getString(R.string.pref_movies_key), getString(R.string.pref_movies_default));
         moviesAsyncTask = new MoviesAsyncTask(new OnTaskCompleted() {
             @Override
-            public void onTaskCompleted(List<PopularMovies> result) {
+            public void onTaskCompleted(List<Movies> result) {
                 if (result != null) {
-                    mPopularMoviesAdapter.clear();
-                    for (PopularMovies popularMovie : result) {
-                        mPopularMoviesAdapter.add(popularMovie);
+                    mMoviesAdapter.clear();
+                    for (Movies popularMovie : result) {
+                        mMoviesAdapter.add(popularMovie);
                     }
                 }
             }
@@ -127,5 +111,5 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
     }
 
     @Override
-    public void onTaskCompleted(List<PopularMovies> result) {}
+    public void onTaskCompleted(List<Movies> result) {}
 }
