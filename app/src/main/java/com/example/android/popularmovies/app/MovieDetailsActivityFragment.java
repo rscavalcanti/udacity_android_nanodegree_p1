@@ -12,9 +12,20 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 public class MovieDetailsActivityFragment extends Fragment {
     private Movies mMovies;
     private ArrayAdapter<Movies> mPopularMoviesAdapter;
+
+    @BindView(R.id.textView_title) TextView title;
+    @BindView(R.id.textView_year) TextView year;
+    @BindView(R.id.textView_user_rating) TextView userRating;
+    @BindView(R.id.textView_overview) TextView overview;
+
+    private Unbinder unbinder;
 
     public MovieDetailsActivityFragment() {
     }
@@ -36,10 +47,7 @@ public class MovieDetailsActivityFragment extends Fragment {
             ListView listView = (ListView) rootView.findViewById(R.id.movie_list);
             listView.setAdapter(mPopularMoviesAdapter);
 
-            TextView title = (TextView) rootView.findViewById(R.id.textView_title);
-            TextView year = (TextView) rootView.findViewById(R.id.textView_year);
-            TextView userRating = (TextView) rootView.findViewById(R.id.textView_user_rating);
-            TextView overview = (TextView) rootView.findViewById(R.id.textView_overview);
+            unbinder = ButterKnife.bind(this, rootView);
 
             title.setText(mMovies.title);
             year.setText(mMovies.releaseDate.substring(0,4));

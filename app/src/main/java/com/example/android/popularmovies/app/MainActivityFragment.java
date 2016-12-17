@@ -83,6 +83,8 @@ public class MainActivityFragment extends Fragment implements OnTaskCompleted {
                     for (Movies popularMovie : result) {
                         mMoviesAdapter.add(popularMovie);
                     }
+                }else{
+                    createToastMessage(R.string.msg_something_went_wrong);
                 }
             }
         });

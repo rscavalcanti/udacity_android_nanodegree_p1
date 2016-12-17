@@ -13,4 +13,5 @@
     <string name="pref_movies_default" translatable="true">popular</string>
 
     <string name="msg_internet_connection" translatable="true">Please check your internet connection."</string>
+    <string name="msg_something_went_wrong" translatable="true">Something went wrong, please check your internet connection and try again!"</string>
 </resources>
