@@ -14,4 +14,6 @@
 
     <string name="msg_internet_connection" translatable="true">Please check your internet connection."</string>
     <string name="msg_something_went_wrong" translatable="true">Something went wrong, please check your internet connection and try again!"</string>
+    
+    <string name="movie_trailers_label" translatable="true">Movie Trailers</string>
 </resources>

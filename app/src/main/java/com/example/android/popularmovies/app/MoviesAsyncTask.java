@@ -140,6 +140,7 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<Movies>> {
     private ArrayList<Movies> getMoviesDataFromJson(String moviesJsonStr)
             throws JSONException {
 
+        final String ID = "id";
         final String RESULTS = "results";
         final String URL = "http://image.tmdb.org/t/p/w185/";
         final String POSTER_PATH = "poster_path";
@@ -155,13 +156,14 @@ public class MoviesAsyncTask extends AsyncTask<String, Void, List<Movies>> {
 
         for (int i = 0; i < moviesArray.length(); i++) {
 
+            int id = moviesArray.getJSONObject(i).getInt(ID);
             String posterPath = moviesArray.getJSONObject(i).getString(POSTER_PATH);
             String title = moviesArray.getJSONObject(i).getString(TITLE);
             String overview = moviesArray.getJSONObject(i).getString(OVERVIEW);
             String releaseDate = moviesArray.getJSONObject(i).getString(RELEASE_DATE);
             String userRating = moviesArray.getJSONObject(i).getString(USER_RATING);
 
-            Movies movies = new Movies(URL + posterPath, title, overview, releaseDate, userRating);
+            Movies movies = new Movies(id, URL + posterPath, title, overview, releaseDate, userRating);
             moviesList.add(movies);
         }
 
